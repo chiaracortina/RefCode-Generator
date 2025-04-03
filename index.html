@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>WhatsApp Link Generator</title>
+  </head>
+  <body>
+    <h1>WhatsApp Link Generator</h1>
+
+    <!-- Radio buttons for Doctor / Doctora -->
+    <label>
+      <input type="radio" name="title" value="Doctor" checked />
+      Doctor
+    </label>
+    <label>
+      <input type="radio" name="title" value="Doctora" />
+      Doctora
+    </label>
+
+    <br /><br />
+
+    <!-- Name input -->
+    <label for="name">Name:</label>
+    <input type="text" id="name" placeholder="Enter name" />
+
+    <br /><br />
+
+    <!-- Ref code input -->
+    <label for="refcode">Ref Code:</label>
+    <input type="text" id="refcode" placeholder="Enter ref code (3 letters)" />
+
+    <br /><br />
+
+    <!-- Generate button -->
+    <button onclick="generateLink()">Generate WhatsApp Link & QR</button>
+
+    <br /><br />
+
+    <!-- Output: link -->
+    <p id="link-output"></p>
+
+    <!-- Action buttons -->
+    <button onclick="copyLink()">Copy WhatsApp Link</button>
+    <button onclick="openTinyURL()">Open TinyURL.com</button>
+
+    <br /><br />
+
+    <!-- QR canvas -->
+    <canvas id="qr-canvas" style="display: none"></canvas>
+    <button onclick="downloadQR()">Download QR Code</button>
+
+    <!-- QR Code library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+
+    <!-- JavaScript logic -->
+    <script>
+      let lastGeneratedLink = ""; // Store last WhatsApp link
+
+      function generateLink() {
+        const titleRaw = document.querySelector(
+          'input[name="title"]:checked'
+        ).value;
+        const name = document.getElementById("name").value.trim();
+        const refcode = document
+          .getElementById("refcode")
+          .value.trim()
+          .toUpperCase();
+
+        if (!name || !refcode) {
+          alert("Please enter both name and ref code.");
+          return;
+        }
+
+        // Convert title to correct abbreviation
+        const title = titleRaw === "Doctor" ? "Dr." : "Dra.";
+
+        // Build exact WhatsApp link
+        const baseURL =
+          "https://api.whatsapp.com/send?phone=5215640032169&text=";
+        const messageEncoded =
+          "%5Bref%3A" +
+          refcode +
+          "%5D%20Hola%20" +
+          title +
+          "%20" +
+          encodeURIComponent(name);
+        const fullLink = baseURL + messageEncoded;
+
+        lastGeneratedLink = fullLink;
+
+        // Show clickable link
+        document.getElementById(
+          "link-output"
+        ).innerHTML = `<a href="${fullLink}" target="_blank">${fullLink}</a>`;
+
+        // Generate QR code
+        const canvas = document.getElementById("qr-canvas");
+        QRCode.toCanvas(canvas, fullLink, function (error) {
+          if (error) console.error(error);
+        });
+      }
+
+      function downloadQR() {
+        const canvas = document.getElementById("qr-canvas");
+        const link = document.createElement("a");
+        link.download = "whatsapp-qr.png";
+        link.href = canvas.toDataURL();
+        link.click();
+      }
+
+      function copyLink() {
+        if (!lastGeneratedLink) {
+          alert("Generate a link first!");
+          return;
+        }
+        navigator.clipboard
+          .writeText(lastGeneratedLink)
+          .then(() => alert("Link copied to clipboard!"))
+          .catch(() => alert("Failed to copy link."));
+      }
+
+      function openTinyURL() {
+        window.open("https://tinyurl.com/", "_blank");
+      }
+    </script>
+  </body>
+</html>
