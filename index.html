@@ -4,29 +4,30 @@
     <title>WhatsApp Link Generator</title>
   </head>
   <body>
+    <img src="leona-logo.png" alt="Leona Logo" width="200" />
     <h1>WhatsApp Link Generator</h1>
 
     <!-- Radio buttons for Doctor / Doctora -->
     <label>
-      <input type="radio" name="title" value="Doctor" checked />
-      Doctor
+      <input type="radio" name="title" value="Dr." checked />
+      Dr.
     </label>
     <label>
-      <input type="radio" name="title" value="Doctora" />
-      Doctora
+      <input type="radio" name="title" value="Dra." />
+      Dra.
     </label>
 
     <br /><br />
 
     <!-- Name input -->
     <label for="name">Name:</label>
-    <input type="text" id="name" placeholder="Enter name" />
+    <input type="text" id="name" placeholder="e.g. Ana" />
 
     <br /><br />
 
     <!-- Ref code input -->
     <label for="refcode">Ref Code:</label>
-    <input type="text" id="refcode" placeholder="Enter ref code (3 letters)" />
+    <input type="text" id="refcode" placeholder="e.g. ABC" />
 
     <br /><br />
 
@@ -71,7 +72,7 @@
         }
 
         // Convert title to correct abbreviation
-        const title = titleRaw === "Doctor" ? "Dr." : "Dra.";
+        const title = titleRaw;
 
         // Build exact WhatsApp link
         const baseURL =
