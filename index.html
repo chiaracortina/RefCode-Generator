@@ -7,7 +7,7 @@
     <img src="leona-logo.png" alt="Leona Logo" width="200" />
     <h1>WhatsApp Link Generator</h1>
 
-    <!-- Radio buttons for Doctor / Doctora -->
+    <!-- Radio buttons for Dr. / Dra. -->
     <label>
       <input type="radio" name="title" value="Dr." checked />
       Dr.
@@ -45,16 +45,23 @@
 
     <br /><br />
 
-    <!-- QR canvas -->
+    <!-- Visible QR code -->
+    <div id="visible-qr"></div>
+
+    <br />
+
+    <!-- Hidden QR canvas for download and copy -->
     <canvas id="qr-canvas" style="display: none"></canvas>
     <button onclick="downloadQR()">Download QR Code</button>
+    <button onclick="copyQR()">Copy QR Code Image</button>
 
-    <!-- QR Code library -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <!-- QR Code libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrious/dist/qrious.min.js"></script>
 
     <!-- JavaScript logic -->
     <script>
-      let lastGeneratedLink = ""; // Store last WhatsApp link
+      let lastGeneratedLink = "";
 
       function generateLink() {
         const titleRaw = document.querySelector(
@@ -71,10 +78,7 @@
           return;
         }
 
-        // Convert title to correct abbreviation
         const title = titleRaw;
-
-        // Build exact WhatsApp link
         const baseURL =
           "https://api.whatsapp.com/send?phone=5215640032169&text=";
         const messageEncoded =
@@ -85,18 +89,28 @@
           "%20" +
           encodeURIComponent(name);
         const fullLink = baseURL + messageEncoded;
-
         lastGeneratedLink = fullLink;
 
-        // Show clickable link
+        // Show link
         document.getElementById(
           "link-output"
         ).innerHTML = `<a href="${fullLink}" target="_blank">${fullLink}</a>`;
 
-        // Generate QR code
+        // Show visible QR
+        const qrDiv = document.getElementById("visible-qr");
+        qrDiv.innerHTML = ""; // clear old QR
+        new QRCode(qrDiv, {
+          text: fullLink,
+          width: 200,
+          height: 200,
+        });
+
+        // Generate canvas for download/copy
         const canvas = document.getElementById("qr-canvas");
-        QRCode.toCanvas(canvas, fullLink, function (error) {
-          if (error) console.error(error);
+        new QRious({
+          element: canvas,
+          value: fullLink,
+          size: 200,
         });
       }
 
@@ -106,6 +120,23 @@
         link.download = "whatsapp-qr.png";
         link.href = canvas.toDataURL();
         link.click();
+      }
+
+      function copyQR() {
+        const canvas = document.getElementById("qr-canvas");
+
+        if (!navigator.clipboard || !canvas.toBlob) {
+          alert("Your browser does not support copying images.");
+          return;
+        }
+
+        canvas.toBlob(function (blob) {
+          const item = new ClipboardItem({ "image/png": blob });
+          navigator.clipboard
+            .write([item])
+            .then(() => alert("QR Code copied to clipboard!"))
+            .catch(() => alert("Failed to copy QR Code."));
+        });
       }
 
       function copyLink() {
